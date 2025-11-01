@@ -28,7 +28,7 @@ for (let i = 0; i < NUM_PRODUCTS; i++) {
   data.products.push({
     name: faker.commerce.productName(),
     description: faker.commerce.productDescription(),
-    priceInCents: parseInt(faker.commerce.price({ min: 1000, max: 50000, dec: 0 })),
+    priceInCents: parseInt(faker.commerce.price({ min: 50000, max: 1500000, dec: 0 })),
     imageUrl: faker.image.urlLoremFlickr({ category: 'technics' }),
   });
 }
