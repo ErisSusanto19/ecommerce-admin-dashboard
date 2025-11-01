@@ -2,6 +2,7 @@
 
 import { SalesChart } from "@/components/SalesChart";
 import { StatCard } from "@/components/StatCard";
+import { formatCurrency } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { DollarSign, ShoppingCart, Users } from "lucide-react";
 
@@ -19,14 +20,6 @@ const fetchAnalytics = async(): Promise<AnalyticsData> => {
   }
 
   return res.json();
-}
-
-const formatCurrency = (amountInCents: number) => {
-  return new Intl.NumberFormat("id-ID", {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0
-  }).format(amountInCents)
 }
 
 export default function Home() {
