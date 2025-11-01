@@ -1,5 +1,6 @@
 "use client"
 
+import { SalesChart } from "@/components/SalesChart";
 import { StatCard } from "@/components/StatCard";
 import { useQuery } from "@tanstack/react-query";
 import { DollarSign, ShoppingCart, Users } from "lucide-react";
@@ -8,6 +9,7 @@ interface AnalyticsData {
   totalRevenueInCents: number;
   totalOrders: number;
   activeCustomers: number;
+  monthlySales: { month: string, totalSales: number }[];
 }
 
 const fetchAnalytics = async(): Promise<AnalyticsData> => {
@@ -24,7 +26,7 @@ const formatCurrency = (amountInCents: number) => {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0
-  }).format(amountInCents/100)
+  }).format(amountInCents)
 }
 
 export default function Home() {
@@ -74,6 +76,10 @@ export default function Home() {
             icon={Users}
             description="Jumlah pelanggan yang pernah memesan"
           />
+
+          <div className="mt-8">
+            <SalesChart data={data?.monthlySales}/>
+          </div>
 
         </div>
       </div>
