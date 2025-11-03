@@ -33,9 +33,6 @@ export const GET = async(request: NextRequest) => {
         }
         : {};
 
-        console.log(JSON.stringify(searchQuery), '<< cek from api');
-        console.log(JSON.stringify(whereClause), '<< cek from api')
-
         const skip = (page - 1) * ORDERS_PER_PAGE;
         const totalOrders = await prisma.order.count({where: whereClause});
 

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface Order {
@@ -30,17 +31,12 @@ const fetchOrders = async(page:number, query: string): Promise<OrdersApiResponse
     if(!res.ok){
         throw new Error("Failed to fetch orders")
     }
-    console.log(page);
-    console.log(query);
-
-    const cek = await res.json()
-    console.log(cek, '<<< cek');
-    
-    return cek
-    // return res.json();
+ 
+    return res.json();
 }
 
 const OrdersPage = () => {
+    const router = useRouter();
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("")
@@ -103,7 +99,11 @@ const OrdersPage = () => {
                     </TableHeader>
                     <TableBody>
                         {data?.orders.map(order => (
-                            <TableRow key={order.id}>
+                            <TableRow 
+                                key={order.id}
+                                onClick={() => router.push(`/orders/${order.id}`)}
+                                className="cursor-pointer hover:bg-muted/50"
+                            >
                                 <TableCell>
                                     <div className="font-medium">{order.customer.name}</div>
                                     <div className="text-sm text-muted-foreground">{order.customer.email}</div>
