@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
@@ -7,12 +7,40 @@ const ORDERS_PER_PAGE = 10;
 export const GET = async(request: NextRequest) => {
     const searchParams = request.nextUrl.searchParams;
     const page = parseInt(searchParams.get('page') || '1');
+    const searchQuery = searchParams.get('query') || '';
 
     try {
+        const whereClause: Prisma.OrderWhereInput = searchQuery
+        ? {
+            OR: [
+                {
+                    customer: {
+                        name: {
+                            contains: searchQuery,
+                            mode: 'insensitive'
+                        }
+                    }
+                },
+                {
+                    customer: {
+                        email: {
+                            contains: searchQuery,
+                            mode: 'insensitive'
+                        }
+                    }
+                }
+            ]
+        }
+        : {};
+
+        console.log(JSON.stringify(searchQuery), '<< cek from api');
+        console.log(JSON.stringify(whereClause), '<< cek from api')
+
         const skip = (page - 1) * ORDERS_PER_PAGE;
-        const totalOrders = await prisma.order.count();
+        const totalOrders = await prisma.order.count({where: whereClause});
 
         const orders = await prisma.order.findMany({
+            where: whereClause,
             skip: skip,
             take: ORDERS_PER_PAGE,
             orderBy: {
