@@ -2,10 +2,11 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Order {
     id: string;
@@ -24,20 +25,40 @@ interface OrdersApiResponse {
     totalPages: number;
 }
 
-const fetchOrders = async(page:number): Promise<OrdersApiResponse> => {
-    const res = await fetch(`/api/orders?page=${page}`)
+const fetchOrders = async(page:number, query: string): Promise<OrdersApiResponse> => {
+    const res = await fetch(`/api/orders?page=${page}&query=${query}`)
     if(!res.ok){
         throw new Error("Failed to fetch orders")
     }
+    console.log(page);
+    console.log(query);
 
-    return res.json();
+    const cek = await res.json()
+    console.log(cek, '<<< cek');
+    
+    return cek
+    // return res.json();
 }
 
 const OrdersPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("")
+
+    useEffect(() => {
+        const timeId = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+            setCurrentPage(1);
+        }, 500)
+
+        return () => {
+            clearTimeout(timeId)
+        }
+    }, [searchTerm])
+
     const {data, isLoading, isError, error} = useQuery<OrdersApiResponse>({
-        queryKey: ['orders', currentPage],
-        queryFn: () => fetchOrders(currentPage)
+        queryKey: ['orders', currentPage, debouncedSearchTerm],
+        queryFn: () => fetchOrders(currentPage, debouncedSearchTerm)
     })
 
     if(isLoading){
@@ -58,7 +79,17 @@ const OrdersPage = () => {
 
     return (
         <main className="min-h-screen p-8">
-            <h1 className="text-3xl font-semibold mb-6">Pesanan</h1>
+            <div className="flex items-center justify-between mb-6">
+                <h1 className="text-3xl font-bold">Pesanan</h1>
+                <div className="w-full max-w-sm">
+                    <Input
+                        type="search"
+                        placeholder="Cari berdasarkan nama atau email..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+            </div>
 
             <div className="bg-white rounded-lg border shadow-sm">
                 <Table>
