@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient;
@@ -34,6 +34,43 @@ export const GET = async(request: NextRequest, {params}: {params: {orderId: stri
             {status: 500}
         );
         
+    } finally {
+        await prisma.$disconnect();
+    }
+}
+
+export const PATCH = async(request: NextRequest, { params }: { params: { orderId: string } }) => {
+    const resolvedParams = await params;
+    const { orderId } = resolvedParams;
+    const body = await request.json();
+    const { status } = body;
+
+    const validStatuses = ["PENDING", "PROCESSING", "DELIVERED", "CANCELLED"];
+    if(!status || !validStatuses.includes(status)){
+        return NextResponse.json({error: "Invalid status provider"}, {status: 400})
+    }
+
+    try {
+        const updatedOrder = await prisma.order.update({
+            where: {
+                id: orderId
+            },
+            data: {
+                status: status
+            }
+        })
+
+        return NextResponse.json(updatedOrder)
+    } catch(error) {
+        console.error(`Failed to update order ${orderId}: `, error)
+        if(error instanceof Prisma.PrismaClientKnownRequestError && error.code == 'P2025'){
+            return NextResponse.json({error: "Order not found"}, {status: 404});
+        }
+
+        return NextResponse.json(
+            {error: "Internal Server Error"},
+            {status: 500}
+        );
     } finally {
         await prisma.$disconnect();
     }
