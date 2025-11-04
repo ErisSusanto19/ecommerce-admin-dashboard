@@ -38,6 +38,9 @@ export default function RootLayout({
               <Link href="/orders" className="text-sm font-medium text-gray-700 hover:text-blue-600">
                 Pesanan
               </Link>
+              <Link href="/customers" className="text-sm font-medium text-gray-700 hover:text-blue-600">
+                Pelanggan
+              </Link>
             </nav>
           </header>
           {children}
