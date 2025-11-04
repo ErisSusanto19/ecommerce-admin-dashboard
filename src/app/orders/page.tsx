@@ -59,16 +59,16 @@ const OrdersPage = () => {
 
     if(isLoading){
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <p className="text-lg text-gray-500">Loading dashboard...</p>
+            <div className="p-8">
+                Loading orders...
             </div>
         )
     }
 
     if(isError){
         return(
-            <div className="flex items-center justify-center min-h-screen">
-                <p className="text-lg text-red-500">Error: {error.message}</p>
+            <div className="p-8">
+                Error: {error.message}
             </div>
         )
     }
