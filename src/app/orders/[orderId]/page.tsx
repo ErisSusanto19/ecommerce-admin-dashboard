@@ -2,9 +2,10 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 
 interface Product {
@@ -44,15 +45,42 @@ const fetchOrderDetail = async (orderId: string): Promise<OrderDetails> => {
     return res.json();
 }
 
+const updateOrderStatus = async({orderId, status}: {orderId: string, status: string}) => {
+    const res = await fetch(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({status})
+    })
+
+    if(!res.ok){
+        throw new Error("Failed to update status");
+    }
+
+    return res.json();
+}
+
 const OrderDetailsPage = () => {
     const params = useParams()
     const orderId = params.orderId as string;
+    const queryClient = useQueryClient()
 
     const {data: order, isLoading, isError, error} = useQuery<OrderDetails>({
         queryKey: ["order", orderId],
         queryFn: () => fetchOrderDetail(orderId),
         enabled: !!orderId
     })
+
+    const updateStatusMutation = useMutation({
+        mutationFn: updateOrderStatus,
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ["order", orderId]});
+            queryClient.invalidateQueries({queryKey: ["order"]});
+        }
+    })
+
+    const handleStatusChange = (newStatus: string) => {
+        updateStatusMutation.mutate({orderId, status: newStatus})
+    }
 
     if(isLoading) return <div className="p-8">Laoding...</div>
     if(isError) return <div className="p-8">Error: {error.message}</div>
@@ -98,7 +126,25 @@ const OrderDetailsPage = () => {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="flex justify-between"><span>ID Pesanan:</span> <span className="font-mono text-sm">{order.id}</span></div>
-                            <div className="flex justify-between items-center"><span>Status:</span> <Badge variant="outline">{order.status}</Badge></div>
+                            <div className="flex justify-between items-center">
+                                <span>Status:</span>
+                                {/* <Badge variant="outline">{order.status}</Badge> */}
+                                <Select
+                                    value={order.status}
+                                    onValueChange={handleStatusChange}
+                                    disabled={updateStatusMutation.isPending}
+                                >
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Ubah status"/>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="PENDING">Pending</SelectItem>
+                                        <SelectItem value="PROCESSING">Processing</SelectItem>
+                                        <SelectItem value="DELIVERED">Delivered</SelectItem>
+                                        <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                             <div className="flex justify-between"><span>Tanggal:</span> <span>{formatDate(order.createdAt)}</span></div>
                             <div className="flex justify-between font-semibold text-lg"><span>Total:</span> <span>{formatCurrency(order.totalInCents)}</span></div>
                         </CardContent>
