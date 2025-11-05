@@ -6,6 +6,7 @@ import { useImageFallback } from "@/lib/hooks";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface Customer {
@@ -33,10 +34,15 @@ const fetchCustomers = async(page: number): Promise<CustomersApiResponse> => {
 }
 
 const CustomerRow = ({ customer }: { customer: Customer }) => {
+    const router = useRouter()
     const imageProps = useImageFallback(customer.avatarUrl, '/user.png');
 
     return (
-        <TableRow key={customer.id}>
+        <TableRow 
+            key={customer.id} 
+            onClick={() => router.push(`/customers/${customer.id}`)}
+            className="cursor-pointer hover:bg-muted/50"
+        >
             <TableCell>
                 <div className="flex items-center space-x-3">
                     <Image

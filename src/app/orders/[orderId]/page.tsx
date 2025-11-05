@@ -1,12 +1,14 @@
 "use client"
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 
 interface Product {
     name: string;
@@ -61,6 +63,7 @@ const updateOrderStatus = async({orderId, status}: {orderId: string, status: str
 
 const OrderDetailsPage = () => {
     const params = useParams()
+    const router = useRouter()
     const orderId = params.orderId as string;
     const queryClient = useQueryClient()
 
@@ -82,13 +85,19 @@ const OrderDetailsPage = () => {
         updateStatusMutation.mutate({orderId, status: newStatus})
     }
 
-    if(isLoading) return <div className="p-8">Laoding...</div>
+    if(isLoading) return <div className="p-8">Loading...</div>
     if(isError) return <div className="p-8">Error: {error.message}</div>
     if(!order) return <div className="p-8">Order not found.</div>
 
     return (
         <main className="p-8">
-            <h1 className="text-xl font-bold mb-6">Detail Pesanan</h1>
+            <div className="flex items-center gap-4 mb-6">
+                <Button variant="outline" size="icon" onClick={() => router.back()}>
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="sr-only">Kembali</span>
+                </Button>
+                <h1 className="text-3xl font-bold">Detail Pesanan</h1>
+            </div>
 
             <div className="grid gap-6 md:grid-cols-3">
                 <div className="md:col-span-2 space-y-6">
