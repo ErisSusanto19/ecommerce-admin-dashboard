@@ -1,5 +1,6 @@
 "use client"
 
+import { EditProductModal } from "@/components/EditProductModal";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useImageFallback } from "@/lib/hooks";
@@ -124,6 +125,12 @@ const ProductsPage = () => {
                     </Button>
                 </div>
             </main>
+
+            <EditProductModal
+                product={editingProduct}
+                isOpen={!!editingProduct}
+                onClose={() => setEditingProduct(null)}
+            />
         </>
     )
 }
