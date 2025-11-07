@@ -37,3 +37,25 @@ export const PATCH = async(request: NextRequest, {params}: { params: { productId
         await prisma.$disconnect();
     }
 }
+
+export const DELETE = async(request: NextRequest, { params }: { params: { productId: string } }) => {
+    const resolvedParams = await params
+    const { productId } = resolvedParams;
+
+    try {
+        await prisma.product.delete({
+          where: { id: productId },
+        });
+        return new NextResponse(null, { status: 204 });
+
+    } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+          return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+        }
+        console.error(`Failed to delete product ${productId}:`, error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+
+    } finally {
+        await prisma.$disconnect();
+    }
+}
