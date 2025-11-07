@@ -17,7 +17,7 @@ interface Product {
 }
 
 interface EditProductModalProps {
-    product: Product | null;
+    product?: Product | null;
     isOpen: boolean;
     onClose: () => void;
 }
@@ -47,11 +47,26 @@ const updateProduct = async({id, data}: {id: string, data: ProductUpdatePayload}
     return res.json();
 }
 
+const createProduct = async({data}: {data: ProductUpdatePayload}) => {
+    const res = await fetch(`/api/products/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    if(!res.ok){
+        throw new Error(`Failed to update product`)
+    }
+
+    return res.json();
+}
+
 export const EditProductModal = ({ product, isOpen, onClose }: EditProductModalProps) => {
     const queryClient = useQueryClient()
+    const isEditMode = !!product;
 
     const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema)
+        resolver: zodResolver(formSchema),
+        defaultValues: { name: "", priceInCents: "" },
     })
 
     useEffect(() => {
@@ -60,11 +75,21 @@ export const EditProductModal = ({ product, isOpen, onClose }: EditProductModalP
                 name: product.name,
                 priceInCents: String(product.priceInCents),
             });
+        } else {
+            form.reset({ name: "", priceInCents: "" });
         }
-    }, [product, form]);
+    }, [product, form, isOpen]);
 
     const updateMutation = useMutation({
         mutationFn: updateProduct,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["products"] });
+            onClose();
+        },
+    });
+
+    const createMutation = useMutation({
+        mutationFn: createProduct,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["products"] });
             onClose();
@@ -79,16 +104,20 @@ export const EditProductModal = ({ product, isOpen, onClose }: EditProductModalP
             priceInCents: parseInt(values.priceInCents, 10),
         };
 
-        updateMutation.mutate({ id: product.id, data: dataToSend });
+        if (isEditMode) {
+            updateMutation.mutate({ id: product.id, data: dataToSend });
+        } else {
+            createMutation.mutate({ data: dataToSend });
+        }
     }
 
-    if (!product) return null;
+    const isPending = updateMutation.isPending || createMutation.isPending;
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Edit Produk: {product.name}</DialogTitle>
+                    <DialogTitle>{isEditMode ? `Edit Produk: ${product.name}` : "Tambah Produk Baru"}</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -118,8 +147,8 @@ export const EditProductModal = ({ product, isOpen, onClose }: EditProductModalP
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" disabled={updateMutation.isPending}>
-                            {updateMutation.isPending ? "Menyimpan..." : "Simpan Perubahan"}
+                        <Button type="submit" disabled={isPending}>
+                            {isPending ? "Menyimpan..." : (isEditMode ? "Simpan Perubahan" : "Buat Produk")}
                         </Button>
                     </form>
                 </Form>
