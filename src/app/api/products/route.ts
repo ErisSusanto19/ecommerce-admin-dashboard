@@ -8,7 +8,6 @@ export const GET = async(request: NextRequest) => {
     const searchParams = request.nextUrl.searchParams;
     const page = parseInt(searchParams.get('page') || '1');
 
-
     try {
         const skip = (page - 1) * PRODUCTS_PER_PAGE;
         const totalProducts = await prisma.product.count();
@@ -32,6 +31,35 @@ export const GET = async(request: NextRequest) => {
             {error: "Internal Server Error"},
             {status: 500}
         )
+    } finally {
+        await prisma.$disconnect();
+    }
+}
+
+export const POST = async(request: NextRequest) => {
+    const body = await request.json();
+
+    const { name, priceInCents, description, imageUrl } = body;
+
+    if (!name || typeof priceInCents !== 'number') {
+        return NextResponse.json({ error: "Invalid data provided" }, { status: 400 });
+    }
+
+    try {
+        const newProduct = await prisma.product.create({
+            data: {
+            name,
+            priceInCents,
+            description: description || "",
+            imageUrl: imageUrl || null,
+            },
+        });
+        return NextResponse.json(newProduct, { status: 201 });
+
+    } catch (error) {
+        console.error("Failed to create product:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+
     } finally {
         await prisma.$disconnect();
     }
