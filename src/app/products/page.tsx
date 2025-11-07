@@ -1,12 +1,13 @@
 "use client"
 
 import { EditProductModal } from "@/components/EditProductModal";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useImageFallback } from "@/lib/hooks";
 import { formatCurrency } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
@@ -44,12 +45,19 @@ async function createProduct(data: { name: string; priceInCents: number; }) {
     return res.json();
 }
 
+async function deleteProduct(productId: string) {
+    const res = await fetch(`/api/products/${productId}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error("Failed to delete product");
+    return true;
+}
+
 interface ProductRowProps {
     product: Product;
     setEditingProduct: (product: Product) => void;
+    setDeletingProduct: (product: Product) => void;
 }
 
-const ProductRow = ({ product, setEditingProduct }: ProductRowProps) => {
+const ProductRow = ({ product, setEditingProduct, setDeletingProduct }: ProductRowProps) => {
     const imageProps = useImageFallback(product.imageUrl, '/undraw_images.svg')
 
     return (
@@ -81,6 +89,7 @@ const ProductRow = ({ product, setEditingProduct }: ProductRowProps) => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => setEditingProduct(product)}>Edit</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setDeletingProduct(product)} className="text-red-600">Hapus</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </TableCell>
@@ -92,10 +101,19 @@ const ProductsPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+    const queryClient = useQueryClient();
 
     const {data, isLoading, isError, error} = useQuery<ProductsApiResponse>({
         queryKey: ["products", currentPage],
         queryFn: () => fetchProducts(currentPage)
+    })
+
+    const deleteMutation = useMutation({
+        mutationFn: deleteProduct,
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ["products"]})
+        }
     })
 
     if(isLoading) return <div className="p-8">Loading...</div>
@@ -125,6 +143,7 @@ const ProductsPage = () => {
                                 <ProductRow 
                                     key={product.id} product={product} 
                                     setEditingProduct={setEditingProduct}
+                                    setDeletingProduct={setDeletingProduct}
                                 />
                             ))}
                         </TableBody>
@@ -164,6 +183,30 @@ const ProductsPage = () => {
                     setIsCreateModalOpen(false);
                 }}
             />
+
+            <AlertDialog
+                open={!!deletingProduct}
+                onOpenChange={() => setDeletingProduct(null)}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Apakah Anda benar-benar yakin?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Tindakan ini tidak dapat dibatalkan. Ini akan menghapus produk "{deletingProduct?.name}" secara permanen.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => deletingProduct && deleteMutation.mutate(deletingProduct.id)}
+                            disabled={deleteMutation.isPending}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {deleteMutation.isPending ? "Menghapus..." : "Ya, Hapus"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     )
 }
