@@ -95,10 +95,8 @@ export const EditProductModal = ({ product, isOpen, onClose }: EditProductModalP
             onClose();
         },
     });
-
+    
     function onSubmit(values: z.infer<typeof formSchema>) {
-        if (!product) return;
-
         const dataToSend = {
             ...values,
             priceInCents: parseInt(values.priceInCents, 10),
