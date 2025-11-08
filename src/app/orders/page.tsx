@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Loader } from "@/components/ui/loader";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -66,8 +67,8 @@ const OrdersPage = () => {
 
     if(isLoading){
         return (
-            <div className="p-8">
-                Loading orders...
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader size={36}/>
             </div>
         )
     }

@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button";
+import { Loader } from "@/components/ui/loader";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useImageFallback } from "@/lib/hooks";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -74,7 +75,14 @@ const CustomersPage = () => {
         queryFn: () => fetchCustomers(currentPage)
     })
 
-    if(isLoading) return <div className="p-8">Loading customers...</div>
+    if(isLoading){
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader size={36}/>
+            </div>
+        )
+    }
+    
     if(isError) return <div className="p-8">Error: {error.message}</div>
 
     return (

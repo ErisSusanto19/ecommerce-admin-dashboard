@@ -4,6 +4,7 @@ import { EditProductModal } from "@/components/EditProductModal";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Loader } from "@/components/ui/loader";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useImageFallback } from "@/lib/hooks";
 import { formatCurrency } from "@/lib/utils";
@@ -111,7 +112,14 @@ const ProductsPage = () => {
         }
     })
 
-    if(isLoading) return <div className="p-8">Loading...</div>
+    if(isLoading){
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader size={36}/>
+            </div>
+        )
+    }
+
     if(isError) return <div className="p-8">Error: {error.message}</div>
 
     return (

@@ -2,6 +2,7 @@
 
 import { SalesChart } from "@/components/SalesChart";
 import { StatCard } from "@/components/StatCard";
+import { Loader } from "@/components/ui/loader";
 import { formatCurrency } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { DollarSign, ShoppingCart, Users } from "lucide-react";
@@ -31,7 +32,7 @@ export default function Home() {
   if(isLoading){
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-lg text-gray-500">Loading dashboard...</p>
+        <Loader size={36}/>
       </div>
     )
   }
