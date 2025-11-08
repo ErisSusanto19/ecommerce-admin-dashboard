@@ -57,6 +57,13 @@ const OrdersPage = () => {
         queryFn: () => fetchOrders(currentPage, debouncedSearchTerm)
     })
 
+    const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "secondary" | "outline"> = {
+        "PENDING": "warning",
+        "PROCESSING": "warning",
+        "DELIVERED": "success",
+        "CANCELLED": "destructive",
+    };
+
     if(isLoading){
         return (
             <div className="p-8">
@@ -109,7 +116,7 @@ const OrdersPage = () => {
                                     <div className="text-sm text-muted-foreground">{order.customer.email}</div>
                                 </TableCell>
                                 <TableCell>
-                                    <Badge variant={"outline"}>{order.status}</Badge>
+                                    <Badge variant={statusVariantMap[order.status]}>{order.status}</Badge>
                                 </TableCell>
                                 <TableCell className="text-right">{formatCurrency(order.totalInCents)}</TableCell>
                                 <TableCell className="text-right">{formatDate(order.createdAt)}</TableCell>

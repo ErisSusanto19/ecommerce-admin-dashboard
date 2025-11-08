@@ -49,6 +49,13 @@ const CustomerDetailsPage = () => {
 
     const imageProps = useImageFallback(customer?.avatarUrl, "/user.png")
 
+    const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "secondary" | "outline"> = {
+        "PENDING": "warning",
+        "PROCESSING": "warning",
+        "DELIVERED": "success",
+        "CANCELLED": "destructive",
+    };
+
     if(isLoading) return <div className="p-8">Loading...</div>
     if(isError) return <div className="p-8">Error: {error.message}</div>
     if(!customer) return <div className="-8">Customer not found.</div>
@@ -123,7 +130,7 @@ const CustomerDetailsPage = () => {
                                         >
                                             <TableCell className="text-sx font-mono">{order.id}</TableCell>
                                             <TableCell>
-                                                <Badge variant={'outline'}>{order.status}</Badge>
+                                                <Badge variant={statusVariantMap[order.status]}>{order.status}</Badge>
                                             </TableCell>
                                             <TableCell>{formatDate(order.createdAt)}</TableCell>
                                             <TableCell className="text-right">{formatCurrency(order.totalInCents)}</TableCell>
