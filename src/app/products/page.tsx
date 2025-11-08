@@ -11,6 +11,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface Product {
     id: string;
@@ -32,17 +33,6 @@ const fetchProducts = async(page: number): Promise<ProductsApiResponse> => {
     }
 
     return res.json()
-}
-
-async function createProduct(data: { name: string; priceInCents: number; }) {
-    const res = await fetch('/api/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-    });
-    if (!res.ok) throw new Error("Failed to create product");
-
-    return res.json();
 }
 
 async function deleteProduct(productId: string) {
@@ -113,6 +103,11 @@ const ProductsPage = () => {
         mutationFn: deleteProduct,
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ["products"]})
+            toast.success("Product successfully deleted.")
+            setDeletingProduct(null)
+        },
+        onError: (error) => {
+            toast.error(`Failed to delete product: ${error.message}`)
         }
     })
 

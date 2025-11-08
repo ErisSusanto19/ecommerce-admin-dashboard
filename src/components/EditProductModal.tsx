@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { toast } from "sonner";
 
 interface Product {
     id: string;
@@ -84,16 +85,24 @@ export const EditProductModal = ({ product, isOpen, onClose }: EditProductModalP
         mutationFn: updateProduct,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["products"] });
+            toast.success("Product successfully updated.")
             onClose();
         },
+        onError: (error) => {
+            toast.error(`Failed to update product: ${error.message}`)
+        }
     });
 
     const createMutation = useMutation({
         mutationFn: createProduct,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["products"] });
+            toast.success("Product successfully created.")
             onClose();
         },
+        onError: (error) => {
+            toast.error(`Failed to create product: ${error.message}`)
+        }
     });
     
     function onSubmit(values: z.infer<typeof formSchema>) {
