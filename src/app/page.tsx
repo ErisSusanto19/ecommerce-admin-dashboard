@@ -1,8 +1,8 @@
 "use client"
 
 import { SalesChart } from "@/components/SalesChart";
+import { DashboardSkeleton } from "@/components/skeletons/DashboardSkeleton";
 import { StatCard } from "@/components/StatCard";
-import { Loader } from "@/components/ui/loader";
 import { formatCurrency } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { DollarSign, ShoppingCart, Users } from "lucide-react";
@@ -31,9 +31,7 @@ export default function Home() {
 
   if(isLoading){
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader size={36}/>
-      </div>
+      <DashboardSkeleton/>
     )
   }
 

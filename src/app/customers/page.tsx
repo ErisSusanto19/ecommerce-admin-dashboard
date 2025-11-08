@@ -1,7 +1,7 @@
 "use client"
 
+import { CustomersPageSkeleton } from "@/components/skeletons/CustomersPageSkeleton";
 import { Button } from "@/components/ui/button";
-import { Loader } from "@/components/ui/loader";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useImageFallback } from "@/lib/hooks";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -77,9 +77,7 @@ const CustomersPage = () => {
 
     if(isLoading){
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <Loader size={36}/>
-            </div>
+            <CustomersPageSkeleton/>
         )
     }
     

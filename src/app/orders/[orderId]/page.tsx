@@ -1,9 +1,8 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge";
+import { OrderDetailsPageSkeleton } from "@/components/skeletons/OrderDetailsPageSkeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader } from "@/components/ui/loader";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -88,9 +87,7 @@ const OrderDetailsPage = () => {
 
     if(isLoading){
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <Loader size={36}/>
-            </div>
+            <OrderDetailsPageSkeleton/>
         )
     }
     
