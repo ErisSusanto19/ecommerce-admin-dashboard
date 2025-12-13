@@ -44,7 +44,7 @@ const ActivityItemRow = ({ item }: { item: ActivityItem }) => {
 
     return (
         <li className="flex items-start space-x-3 pb-4 border-b last:border-b-0">
-            <div className="flex-shrink-0 mt-1">
+            <div className="shrink-0 mt-1">
                 {icons[item.type] || <Package className="h-4 w-4" />}
             </div>
             <div className="flex-1">
